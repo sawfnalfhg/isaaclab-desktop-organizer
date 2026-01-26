@@ -1,0 +1,275 @@
+{
+    "version": "1.0",
+    "file_records": [
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/basket/texture.png",
+            "source_hash": "9ccdd2c102a45771c28ce5cda0dcbb24cde0694f",
+            "target_url": "./SubUSDs/textures/basket/texture.png",
+            "target_hash": "05a5bf070f8019ba7abd5dc9b91778eed11c82a5"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/milk/texture_map.png",
+            "source_hash": "0eea158cefe68b5974911f165babaa3c410e10ea",
+            "target_url": "./SubUSDs/textures/milk/texture_map.png",
+            "target_hash": "ecaec6c7b63449b2381189994199bb862bdc0983"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/default_environment/WireframeBlur_basecolor.png",
+            "source_hash": "e25b039fbe34da9a08acd7784ed993617b7d3b29",
+            "target_url": "./SubUSDs/textures/default_environment/WireframeBlur_basecolor.png",
+            "target_hash": "e9f6e7ca73560bf1ea560c1a0c1fbbc91738ef95"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/default_environment/WireframeBlur_blue.png",
+            "source_hash": "62c6866eb7858522916a839c1d30a75906e59c64",
+            "target_url": "./SubUSDs/textures/default_environment/WireframeBlur_blue.png",
+            "target_hash": "867e3cbf8cba8243b4ae08e7e223074732330ff4"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/default_environment/Wireframe_blue.png",
+            "source_hash": "ae8cbf9b0a8a973a42d7c51005cfd1c483aa2ebc",
+            "target_url": "./SubUSDs/textures/default_environment/Wireframe_blue.png",
+            "target_hash": "ad70d2db104281d2dcf78379c089ea3bb098229d"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/ketchup/texture_map.png",
+            "source_hash": "17706af67ca41a5d2e295d69aaad2421caeed47e",
+            "target_url": "./SubUSDs/textures/ketchup/texture_map.png",
+            "target_hash": "23cf72543bd4f799afc128e97b1006511848b627"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/orange_juice/texture_map.png",
+            "source_hash": "06b998543a7c86b8c752071cfb8bb4f87670b7fd",
+            "target_url": "./SubUSDs/textures/orange_juice/texture_map.png",
+            "target_hash": "53454f55635bc6f6e3785c228ed20b21b68a39dd"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/cream_cheese/texture_map.png",
+            "source_hash": "17a74c549b13d9853d06e000eb74555a10f426cb",
+            "target_url": "./SubUSDs/textures/cream_cheese/texture_map.png",
+            "target_hash": "746de56e0bef9397f4fc8a29d03957317a7ef334"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/instanceable_collision_meshes.usd",
+            "source_hash": "20e664aae9261dbe5e9a3ff050ad0b4f3010e2cd",
+            "target_url": "./SubUSDs/instanceable_collision_meshes.usd",
+            "target_hash": "c808afa0f423c10393bed16507210c2f31eb4f95"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_hand.usd",
+            "source_hash": "84282654180891bb1c99225eabac892139a0e583",
+            "target_url": "./SubUSDs/panda_hand.usd",
+            "target_hash": "edcc1efe81e8f2d475e79908c7a18beff1ecaf8d"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_leftfinger.usd",
+            "source_hash": "d8658942dad73b69bd33a7ad3e12e953cf5c87b3",
+            "target_url": "./SubUSDs/panda_leftfinger.usd",
+            "target_hash": "41d530a30797f4a6888d79a5304d791b2f456257"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_link0.usd",
+            "source_hash": "3c45249de0e4ead3428bc2f509d44dc7144b36e1",
+            "target_url": "./SubUSDs/panda_link0.usd",
+            "target_hash": "13c16f945720f7f4a06a022441c33f547e7eb439"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_link1.usd",
+            "source_hash": "e8e743b1e26740a033751a9cad539f14fa9887d1",
+            "target_url": "./SubUSDs/panda_link1.usd",
+            "target_hash": "60817babe2002965306b9c815cb6a59d9c8d592f"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_link2.usd",
+            "source_hash": "65009247bb850ce7118d4bd3121f131b8e0f235d",
+            "target_url": "./SubUSDs/panda_link2.usd",
+            "target_hash": "2aa974826e1e378617e10dc68ebf3390fd561914"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_link3.usd",
+            "source_hash": "765d86020571f9793c1da2d1ff50d3d9a5b4eaee",
+            "target_url": "./SubUSDs/panda_link3.usd",
+            "target_hash": "f9c9394215c300309ce5f2e3d814e5bd1fae1391"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_link4.usd",
+            "source_hash": "0f90ee9ea1b35fde053a273ab7912f88d9cbac0f",
+            "target_url": "./SubUSDs/panda_link4.usd",
+            "target_hash": "62e15963c5b93023444b17ebb59cb9236a5ab09e"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_link5.usd",
+            "source_hash": "f01ff9cb0b15f3468c5d3b6cbb1b3aff53dc024c",
+            "target_url": "./SubUSDs/panda_link5.usd",
+            "target_hash": "a07496ee03246fae47c167af1f5d47e17c656a85"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_link6.usd",
+            "source_hash": "57132c33ce2edf28a377eda1029e86f3c63a3663",
+            "target_url": "./SubUSDs/panda_link6.usd",
+            "target_hash": "cd87c03a4da053f442f734f4f0931b5c359f7873"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_link7.usd",
+            "source_hash": "c6318cd4a0ccd48d236b762c1e8033acffc8a664",
+            "target_url": "./SubUSDs/panda_link7.usd",
+            "target_hash": "e88300cd1284c197ab458bfdcd36356097a96b43"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/panda_rightfinger.usd",
+            "source_hash": "076ec1d0b27071267be1c444b7162dae11ecaac5",
+            "target_url": "./SubUSDs/panda_rightfinger.usd",
+            "target_hash": "83434ebe9b6cb5f7daff4fba9d525b9b341cb0f3"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/textures/living_room_table/living_room_table_texture.png",
+            "source_hash": "2b41e1aa97c925445d51e7f9bffdcfa464484b27",
+            "target_url": "./SubUSDs/textures/living_room_table/living_room_table_texture.png",
+            "target_hash": "edef5fc9adf9317c59055282ec836a88747c88c3"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/cables_connected.usd",
+            "source_hash": "fb06273729e1c532835fda6fb9f7be6e237bdcb4",
+            "target_url": "./SubUSDs/cables_connected.usd",
+            "target_hash": "0614239d470746a1503e1bdf4cbcce9b9ce092a8"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/logo_decals.usd",
+            "source_hash": "8a46faf7ae0c1f2c16ae69894272e46c6c40cc61",
+            "target_url": "./SubUSDs/logo_decals.usd",
+            "target_hash": "0890e299b8fd3715c158db5f6a1b5d8ae32009da"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_leftfinger_flex.usd",
+            "source_hash": "dd75e9906de85217102e78a3f0213c95c4d70a7b",
+            "target_url": "./SubUSDs/panda_leftfinger_flex.usd",
+            "target_hash": "ff4c37b815417fe5a54c7f670d42d294b0ee53c6"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_link0.usd",
+            "source_hash": "1151c1e63db2faeb2dc41abf2015960255e4d91a",
+            "target_url": "./SubUSDs/panda_link0_1.usd",
+            "target_hash": "97d73fe746d3a724a3b569b462f9632b65618ef7"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_link1.usd",
+            "source_hash": "70f95a8aa83d04167aa88ca05de1af0d933c670a",
+            "target_url": "./SubUSDs/panda_link1_1.usd",
+            "target_hash": "a8b1d7de259b6fd417f8201e1c967d0d61987ce2"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_link2.usd",
+            "source_hash": "6dc2dc2d7cf0b6c3ba40a9b8e62c31c8fb796eaf",
+            "target_url": "./SubUSDs/panda_link2_1.usd",
+            "target_hash": "744c100e2a8d22f5bc52a24bdd77a24e74fe4296"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_link3.usd",
+            "source_hash": "b8d0086e4ac07b37cf30a0d4656adbe8acd95284",
+            "target_url": "./SubUSDs/panda_link3_1.usd",
+            "target_hash": "a4e88786975195593ee446c459e9f02ae1a16d73"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_link4.usd",
+            "source_hash": "9f02113603eceafcb4ed14b3c3a86ae0f0afcbb3",
+            "target_url": "./SubUSDs/panda_link4_1.usd",
+            "target_hash": "c337aac58fa0a8b2eba5bf5f206d3c95a50392cd"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_link5.usd",
+            "source_hash": "be1a8f368767fb04e4d0824b1d0384c2d6f5e225",
+            "target_url": "./SubUSDs/panda_link5_1.usd",
+            "target_hash": "23fb6144e620658e7c31ce70c5dbedbe6d8eb468"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_link6.usd",
+            "source_hash": "e95de0d3c87315d2c9b2e04896c3ba66fa83093c",
+            "target_url": "./SubUSDs/panda_link6_1.usd",
+            "target_hash": "8d918e8d8fe4540673a312c709d8639a6b5143a9"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_link7.usd",
+            "source_hash": "718e52d9dd2611dca3cf565e3c97a7760d47abd3",
+            "target_url": "./SubUSDs/panda_link7_1.usd",
+            "target_hash": "035fdda91f1ce11e953d7d173b5fb97a7d68a588"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/panda_rightfinger_flex.usd",
+            "source_hash": "e3638cd23797931de2c75462fe7c20977c7418bb",
+            "target_url": "./SubUSDs/panda_rightfinger_flex.usd",
+            "target_hash": "32b562aeb40bb030865bc60892b0744a2b3a8b17"
+        },
+        {
+            "source_url": "/root/isaacsim/amy_isaacsim/Collected_table_clean/SubUSDs/Materials.usd",
+            "source_hash": "1c37f2472514e808a71482f6856f9ef244eaf3fb",
+            "target_url": "./SubUSDs/Materials.usd",
+            "target_hash": "eec8596c432f6a4faa85b69c159801ae6b894ab7"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/configuration/franka_Gripper_Robotiq_2F_85.usd",
+            "source_hash": "8c217365cd30ea4c8180af56a8f30f0aeffb094c",
+            "target_url": "./SubUSDs/franka_Gripper_Robotiq_2F_85.usd",
+            "target_hash": "846de4cb1b59bcd51a97e33c8b2d5321e3435991"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/Robotiq/2F-85/Robotiq_2F_85_edit.usd",
+            "source_hash": "74e83f023d8288f667a2f14e3d4fbe1ab3b28d5f",
+            "target_url": "./SubUSDs/Robotiq_2F_85_edit.usd",
+            "target_hash": "8201f445e54c895a85d1780ffddb60810fa8e24d"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/Materials/Textures/Logo_Textures_Albedo.png",
+            "source_hash": "30f9502f35eabc8e7988e0cefed1289b6f64d2fc",
+            "target_url": "./SubUSDs/textures/logo_decals/Logo_Textures_Albedo.png",
+            "target_hash": "8792a5ba8d7132ca33ff11e89bec7a5e62d7ba55"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/Materials/Textures/Logo_Textures_Metallic.png",
+            "source_hash": "1d5fb6219ae91a555f361bf4f7bdb54efe723f1c",
+            "target_url": "./SubUSDs/textures/logo_decals/Logo_Textures_Metallic.png",
+            "target_hash": "d4c2de74101adf3c699bcf4457d7e5a5d14b7044"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/Materials/Textures/Logo_Textures_Opacity.png",
+            "source_hash": "b85183f467a6e21670d2dce3b5acb71dfe58e6d9",
+            "target_url": "./SubUSDs/textures/logo_decals/Logo_Textures_Opacity.png",
+            "target_hash": "083cc7fff9b32a30001e309d343d9dc230754b53"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/Materials/Textures/Logo_Textures_roughness.png",
+            "source_hash": "e0024e6251d18b1292cbb3972645ab577900327c",
+            "target_url": "./SubUSDs/textures/logo_decals/Logo_Textures_roughness.png",
+            "target_hash": "694a7c1467888093ff47cf535f19ada8d33bbb82"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/FrankaRobotics/FrankaPanda/DetailedProps/Materials/Textures/normal.png",
+            "source_hash": "3a140474e2fc9348c124a9cefe79a0c46a6c37ac",
+            "target_url": "./SubUSDs/textures/logo_decals/normal.png",
+            "target_hash": "f78e5bde73df5e4a0dbb444a95cb7ba12dd60480"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/Robotiq/2F-85/configuration/Robotiq_2F_85_robot.usd",
+            "source_hash": "cfa5e5cd937a1f79a8e8e7714c08434a1a6d504a",
+            "target_url": "./SubUSDs/Robotiq_2F_85_robot.usd",
+            "target_hash": "da0d9d909cd756263933830a9032b7ea9c2a7298"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/Robotiq/2F-85/payloads/Robotiq_2F_85_base.usda",
+            "source_hash": "9ce9af5055a9118382bc2fda7da794b41cbc3190",
+            "target_url": "./SubUSDs/Robotiq_2F_85_base.usda",
+            "target_hash": "60b272490d6d5e8ca23a555e1e63f9509f50ee85"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/Robotiq/2F-85/payloads/Robotiq_2F_85_phyisics_loop.usda",
+            "source_hash": "36a2a275c9baf95d166e9734fc8f45f523450455",
+            "target_url": "./SubUSDs/Robotiq_2F_85_phyisics_loop.usda",
+            "target_hash": "0a4e142a6ecda5c1b13fce96abfb76d58e99efb3"
+        },
+        {
+            "source_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.0/Isaac/Robots/Robotiq/2F-85/payloads/Robotiq_2F_85_phyisics_mimic.usda",
+            "source_hash": "76bd5f3d89a94f100859d3799b07bdfa7400dfff",
+            "target_url": "./SubUSDs/Robotiq_2F_85_phyisics_mimic.usda",
+            "target_hash": "d2d0462ee49f070a7ea923478960bf39c81dee38"
+        }
+    ]
+}

@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "isaaclab-desktop-organizer"
+version = "0.1.0"
+description = "A Franka robotic manipulation task for Isaac Lab: pick-and-place objects into basket"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["robotics", "reinforcement-learning", "isaac-lab", "manipulation", "franka", "pick-and-place"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Robotics",
+]
+
+dependencies = [
+    "isaaclab>=0.5.0",
+    "torch>=2.0.0",
+    "numpy>=1.24.0",
+    "gymnasium>=0.29.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black>=23.0",
+    "ruff>=0.1.0",
+]
+rl = [
+    "rsl-rl>=1.0.0",
+]
+bc = [
+    "robomimic>=0.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/<your-username>/isaaclab-desktop-organizer"
+Repository = "https://github.com/<your-username>/isaaclab-desktop-organizer"
+Documentation = "https://github.com/<your-username>/isaaclab-desktop-organizer/tree/main/docs"
+"Bug Tracker" = "https://github.com/<your-username>/isaaclab-desktop-organizer/issues"
+
+[project.scripts]
+desktop-organizer-train = "scripts.train_rl:main"
+desktop-organizer-play = "scripts.play_rl:main"
+
+[tool.setuptools]
+packages = ["desktop_organizer"]
+
+[tool.setuptools.package-data]
+desktop_organizer = ["config/robomimic/*.json"]

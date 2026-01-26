@@ -1,0 +1,3 @@
+include README.md
+include LICENSE
+recursive-include desktop_organizer/config *.json *.yaml
