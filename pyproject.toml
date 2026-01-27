@@ -24,7 +24,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "isaaclab>=0.5.0",
+    # Note: Isaac Lab must be installed separately from source
+    # See: https://isaac-sim.github.io/IsaacLab/source/setup/installation.html
     "torch>=2.0.0",
     "numpy>=1.24.0",
     "gymnasium>=0.29.0",
@@ -37,10 +38,11 @@ dev = [
     "ruff>=0.1.0",
 ]
 rl = [
-    "rsl-rl>=1.0.0",
+    "rsl-rl-lib>=2.3.0",  # 正确的包名是 rsl-rl-lib
 ]
 bc = [
     "robomimic>=0.3.0",
+    "h5py>=3.0.0",  # Robomimic 需要 h5py
 ]
 
 [project.urls]

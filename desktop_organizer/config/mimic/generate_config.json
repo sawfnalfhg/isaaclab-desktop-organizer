@@ -1,0 +1,13 @@
+{
+  "env": "Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0",
+  "num_envs": 50,
+  "source_dataset": "./datasets/test_annotated.hdf5",
+  "target_dataset": "./datasets/test_generated.hdf5",
+  "num_demos": 20,
+  "render": false,
+  "action_noise": 0.03,
+  "interpolate_num_steps": 5,
+  "subtask_term_offset_range": [3, 8],
+  "use_actions": false,
+  "verbose": true
+}

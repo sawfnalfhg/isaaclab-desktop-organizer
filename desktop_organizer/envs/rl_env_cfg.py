@@ -185,7 +185,7 @@ class ObservationsCfg:
         joint_vel = ObsTerm(func=isaaclab_mdp.joint_vel_rel)
 
         # Ketchup position (in robot root frame)
-        object_position = ObsTerm(func=isaaclab_mdp.object_position_in_robot_root_frame, params={"object_cfg": SceneEntityCfg("ketchup")})
+        object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame, params={"object_cfg": SceneEntityCfg("ketchup")})
 
         # Target position (basket center above)
         target_object_position = ObsTerm(func=isaaclab_mdp.generated_commands, params={"command_name": "object_pose"})
@@ -207,14 +207,14 @@ class RewardsCfg:
 
     # 1. Reaching: end-effector approaching ketchup
     reaching_object = RewTerm(
-        func=isaaclab_mdp.object_ee_distance,
+        func=mdp.object_ee_distance,
         params={"std": 0.1, "object_cfg": SceneEntityCfg("ketchup")},
         weight=5.0,
     )
 
     # 2. Lifting: ketchup being lifted (reduced to avoid "holding and not releasing")
     lifting_object = RewTerm(
-        func=isaaclab_mdp.object_is_lifted,
+        func=mdp.object_is_lifted,
         params={"minimal_height": 0.52, "object_cfg": SceneEntityCfg("ketchup")},
         weight=10.0,
     )
@@ -233,14 +233,14 @@ class RewardsCfg:
 
     # 4. Object goal tracking (coarse)
     object_goal_tracking = RewTerm(
-        func=isaaclab_mdp.object_goal_distance,
+        func=mdp.object_goal_distance,
         params={"std": 0.3, "minimal_height": 0.52, "command_name": "object_pose", "object_cfg": SceneEntityCfg("ketchup")},
         weight=10.0,
     )
 
     # 5. Object goal tracking fine-grained (KEY reduction!)
     object_goal_tracking_fine_grained = RewTerm(
-        func=isaaclab_mdp.object_goal_distance,
+        func=mdp.object_goal_distance,
         params={"std": 0.05, "minimal_height": 0.52, "command_name": "object_pose", "object_cfg": SceneEntityCfg("ketchup")},
         weight=50.0,
     )

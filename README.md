@@ -31,20 +31,38 @@
 
 ### 前置要求
 
-1. **Isaac Lab 0.5.0+** - 按照[官方安装指南](https://isaac-sim.github.io/IsaacLab/source/setup/installation.html)安装
+1. **Isaac Lab 0.5.0+** - 必须先安装 Isaac Lab（不能通过 pip 安装）
+
+```bash
+# 克隆 Isaac Lab 仓库
+git clone https://github.com/isaac-sim/IsaacLab.git
+cd IsaacLab
+
+# 按照官方指南安装
+# 详见: https://isaac-sim.github.io/IsaacLab/source/setup/installation.html
+./isaaclab.sh --install
+```
+
 2. **Python 3.10+**
 3. **CUDA 11.8+**（用于 GPU 加速）
 
 ### 安装本包
 
+**重要**：必须在 IsaacLab 环境中安装！
+
 ```bash
-# 方案 1：从源码安装（推荐，用于开发）
+# 激活 IsaacLab 环境
+cd /path/to/IsaacLab
+source .venv/bin/activate  # Linux/Mac
+# 或者 .venv\Scripts\activate  # Windows
+
+# 克隆本仓库
+cd ..
 git clone https://github.com/<your-username>/isaaclab-desktop-organizer.git
 cd isaaclab-desktop-organizer
-pip install -e .
 
-# 方案 2：从 PyPI 安装（发布后可用）
-pip install isaaclab-desktop-organizer
+# 安装本包（开发模式）
+pip install -e .
 
 # 可选：安装强化学习依赖
 pip install -e ".[rl]"
@@ -57,39 +75,63 @@ pip install -e ".[bc]"
 
 ## 🚀 快速开始
 
-### 1️⃣ 使用强化学习训练（PPO）
+### 注册的环境 ID
+
+本项目在安装时自动注册了以下 Gym 环境：
+
+| 环境 ID | 用途 |
+|---------|------|
+| `Isaac-Desktop-Organizer-Franka-IK-Rel-v0` | RL 训练 |
+| `Isaac-Desktop-Organizer-Franka-IK-Rel-Play-v0` | RL 推理评估 |
+| `Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0` | Mimic 数据采集 + BC 训练 |
+
+### 1️⃣ 使用本项目脚本训练（推荐）
 
 ```bash
-# 从头训练
-python scripts/train_rl.py \
+# 进入 IsaacLab 目录
+cd /path/to/IsaacLab
+
+# 快速测试（10 轮迭代，约 1-2 分钟）
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+  --num_envs 512 \
+  --max_iterations 10 \
+  --headless
+
+# 完整训练（3000 轮迭代）
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
   --num_envs 4096 \
   --max_iterations 3000 \
   --headless
 
 # 继续训练
-python scripts/train_rl.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
   --num_envs 4096 \
   --max_iterations 5000 \
   --resume \
-  --load_run 2026-01-23_17-58-10
+  --load_run 2026-01-23_17-58-10 \
+  --headless
 ```
 
 **预期结果**：
-- 训练时间：~2-3 小时（RTX 4090）
+- 快速测试（10 轮）：约 1-2 分钟
+- 完整训练（3000 轮）：约 2-3 小时（RTX 4090）
 - 成功率：2500 轮后达到 80-85%
 - Episode 长度：平均 4.2 秒
+
+**训练日志位置**：`./logs/rsl_rl/desktop_organizer/`
 
 ### 2️⃣ 可视化训练好的策略
 
 ```bash
-python scripts/play_rl.py \
+# 使用本项目脚本
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/play_rl.py \
   --load_run 2026-01-23_17-58-10 \
   --num_envs 16
 ```
 
 ### 3️⃣ 使用模仿学习训练（BC + MimicGen）
 
-使用 Isaac Lab 官方脚本配合你注册的环境：
+使用 Isaac Lab 官方脚本配合本项目注册的环境：
 
 ```bash
 # 步骤 1：录制人工演示
@@ -334,17 +376,214 @@ Developed a standalone robotic manipulation package for Isaac Lab:
 
 ---
 
+## 🔧 故障排查
+
+### 常见错误 1: "No module named 'omni.log'"
+
+**错误现象**：
+```bash
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py
+# ModuleNotFoundError: No module named 'omni.log'
+```
+
+**原因**：Isaac Sim 未正确初始化
+
+**解决**：此错误已在 `train_rl.py` 中修复，确保使用最新版本的脚本。脚本会自动调用 `AppLauncher` 初始化 Isaac Sim。
+
+---
+
+### 常见错误 2: "ManagerBasedRLEnv.__init__() missing 1 required positional argument: 'cfg'"
+
+**错误现象**：
+```python
+env = gym.make("Isaac-Desktop-Organizer-Franka-IK-Rel-v0", num_envs=512)
+# TypeError: missing 1 required positional argument: 'cfg'
+```
+
+**原因**：IsaacLab 环境需要显式传递配置对象
+
+**解决**：此错误已在 `train_rl.py` 中修复。脚本会自动调用 `parse_env_cfg()` 解析配置。
+
+---
+
+### 常见错误 3: "'OrderEnforcing' object has no attribute 'get_observations'"
+
+**错误现象**：训练时报错缺少 `get_observations` 方法
+
+**原因**：环境未用 `RslRlVecEnvWrapper` 包装
+
+**解决**：此错误已在 `train_rl.py` 中修复。脚本会自动调用 `RslRlVecEnvWrapper` 包装环境。
+
+---
+
+### 验证安装
+
+运行以下测试脚本验证安装正确：
+
+```bash
+# 进入 IsaacLab 目录
+cd /path/to/IsaacLab
+
+# 快速测试（10 轮迭代，1-2 分钟）
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+  --num_envs 512 \
+  --max_iterations 10 \
+  --headless
+```
+
+**预期输出**：
+```
+[INFO] Parsing environment config for: Isaac-Desktop-Organizer-Franka-IK-Rel-v0
+[INFO] Creating environment: Isaac-Desktop-Organizer-Franka-IK-Rel-v0
+[INFO] Wrapping environment with RslRlVecEnvWrapper...
+[INFO] Creating PPO runner...
+[INFO] Starting training for 10 iterations...
+================================================================================
+# ... 训练进度
+================================================================================
+[INFO] Training complete!
+```
+
+如果以上输出正常，说明安装成功！
+
+---
+
+## ❓ 常见问题（FAQ）
+
+### Q1: 我已经安装了 IsaacLab，如何使用这个项目？
+
+**答**：两个简单步骤：
+
+```bash
+# 1. 激活 IsaacLab 环境
+cd /path/to/IsaacLab
+source .venv/bin/activate
+
+# 2. 安装本项目
+cd ~/isaaclab-desktop-organizer
+pip install -e .
+
+# 3. 开始训练
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+  --num_envs 4096 \
+  --headless
+```
+
+### Q2: 为什么不能用 IsaacLab 官方的 train.py？
+
+**答**：官方 `train.py` 只导入了主项目环境（`isaaclab_tasks`），没有导入外部包（`desktop_organizer`）：
+
+```python
+# 官方 train.py 第 96 行
+import isaaclab_tasks  # noqa: F401
+# ❌ 没有 import desktop_organizer
+```
+
+**解决方案**：使用本项目提供的 `train_rl.py` 脚本，该脚本已修复所有问题并优化参数默认值。
+
+### Q3: 为什么需要安装本项目？不能直接用吗？
+
+**答**：本项目需要安装的原因：
+1. ✅ 注册 Gym 环境 ID（`Isaac-Desktop-Organizer-Franka-IK-Rel-v0`）
+2. ✅ 安装自定义奖励函数（`object_command_progress`, `gripper_closed_at_goal`）
+3. ✅ 配置场景资产路径
+
+安装后，IsaacLab 的所有官方脚本都能识别你的环境。
+
+### Q4: 训练脚本的关键修复有哪些？
+
+**答**：`train_rl.py` 脚本经过以下关键修复：
+
+1. ✅ **自动初始化 Isaac Sim**：调用 `AppLauncher` 初始化
+2. ✅ **正确解析配置**：使用 `parse_env_cfg()` 生成环境配置
+3. ✅ **环境包装**：用 `RslRlVecEnvWrapper` 包装，兼容 RSL-RL
+4. ✅ **参数优化**：移除冲突参数，使用最佳默认值
+
+详细修复记录请查看 `/root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_FIXES.md`
+
+### Q5: 如何验证环境注册成功？
+
+```bash
+cd /path/to/IsaacLab
+source .venv/bin/activate
+
+python -c "
+import desktop_organizer
+import gymnasium as gym
+print('✅ 已注册环境:', [spec.id for spec in gym.envs.registry.values() if 'Desktop-Organizer' in spec.id])
+"
+```
+
+**预期输出**：
+```
+✅ 已注册环境: ['Isaac-Desktop-Organizer-Franka-IK-Rel-v0',
+                'Isaac-Desktop-Organizer-Franka-IK-Rel-Play-v0',
+                'Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0']
+```
+
+### Q6: 训练时出现 `ModuleNotFoundError: No module named 'desktop_organizer'`
+
+**原因**：未安装本项目或未激活正确的环境
+
+**解决**：
+```bash
+# 1. 确认在 IsaacLab 环境中
+cd /path/to/IsaacLab
+source .venv/bin/activate
+
+# 2. 重新安装
+cd ~/isaaclab-desktop-organizer
+pip install -e .
+
+# 3. 验证
+python -c "import desktop_organizer; print('✅ 安装成功')"
+```
+
+### Q7: 我的主项目和外部包环境 ID 有什么区别？
+
+**答**：命名略有不同，但功能相同：
+
+| 功能 | 主项目 | 外部包（本项目） |
+|------|--------|-----------------|
+| **RL 训练** | `Isaac-Desktop-Organizer-Franka-**RL-IK-Rel**-v0` | `Isaac-Desktop-Organizer-Franka-**IK-Rel**-v0` |
+| **Mimic** | `Isaac-Desktop-Organizer-Franka-**IK-Rel-Mimic**-v0` | `Isaac-Desktop-Organizer-Franka-**Mimic-IK-Rel**-v0` |
+
+主项目 RL 环境多了 `RL-` 前缀，Mimic 环境的 `Mimic` 位置不同。
+
+### Q8: 能否不安装，直接把代码复制到 IsaacLab 里？
+
+**可以，但不推荐**。如果一定要这样做：
+
+```bash
+# 将你的包复制到 IsaacLab 的 source 目录
+cp -r ~/isaaclab-desktop-organizer/desktop_organizer \
+      /path/to/IsaacLab/source/extensions/isaaclab.ext/isaaclab_tasks/
+
+# 注册环境（在 IsaacLab 的 __init__.py 中添加）
+# 但这样会修改 IsaacLab 源码，不建议
+```
+
+**为什么不推荐**：
+- ❌ 修改了 IsaacLab 源码
+- ❌ 升级 IsaacLab 时会丢失你的代码
+- ❌ 难以版本控制
+
+---
+
 ## 🔍 相关资源
 
 ### 教程链接
 - [强化学习训练完整教程](docs/installation.md#step-3-run-a-quick-training-test-10-iterations)
 - [MimicGen 数据生成完整流程](docs/mimic_data_generation.md#-完整数据流程)
 - [自定义奖励函数教程](docs/mimic_data_generation.md#-mimic-配置在环境中定义)
+- [**训练脚本修复记录**](/root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_FIXES.md) - 详细记录所有问题和解决方案
 
 ### 常见问题
 - [为什么机械臂抓着不放？](docs/mimic_data_generation.md#1-生成成功率低--30)
 - [如何调整随机化范围？](#自定义物体随机化范围)
 - [如何修改网络结构？](#自定义-ppo-超参数)
+- [为什么不能用官方 train.py？](#q2-为什么不能用-isaaclab-官方的-trainpy)
+- [训练脚本做了哪些修复？](#q4-训练脚本的关键修复有哪些)
 
 ---
 
