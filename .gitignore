@@ -18,6 +18,8 @@ var/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
+tests/
+PROJECT_SUMMARY.md
 *.egg-info/
 .installed.cfg
 *.egg
