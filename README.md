@@ -1,4 +1,4 @@
-# 🤖 IsaacLab 桌面整理机器人
+# 🤖 IsaacLab 桌面收纳任务
 
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Isaac Lab](https://img.shields.io/badge/Isaac%20Lab-0.5.0+-green.svg)](https://isaac-sim.github.io/IsaacLab/)
@@ -24,6 +24,42 @@
 | **数据增强** | MimicGen（10 条演示 → 100+ 条） |
 | **算法支持** | RSL-RL (PPO) + Robomimic (BC) |
 | **并行训练** | 4096 个并行环境，快速训练 |
+| **工具脚本** | **官方完整版**（与 IsaacLab 功能完全一致） |
+
+---
+
+## 🎯 重要说明：工具脚本已完全对齐官方版本
+
+> **✅ 2026-01-27 更新**：所有训练和数据采集脚本已替换为 **IsaacLab 官方完整版本**，功能与官方脚本完全一致。
+
+### 包含的完整功能
+
+所有脚本（`train_rl.py`, `play_rl.py`, `record_demos.py` 等）都是官方脚本的完整副本，包括：
+
+| 功能 | 说明 |
+|------|------|
+| ✅ **Hydra 配置系统** | 动态加载环境和算法配置 |
+| ✅ **种子设置** | `env_cfg.seed = agent_cfg.seed` 确保实验可重现 |
+| ✅ **配置文件导出** | 自动保存 `env.yaml` 和 `agent.yaml` 到日志目录 |
+| ✅ **Git 仓库追踪** | `runner.add_git_repo_to_log()` 记录代码版本 |
+| ✅ **视频录制** | `--video` 参数支持训练过程可视化 |
+| ✅ **多 GPU 训练** | `--distributed` 参数支持分布式训练 |
+| ✅ **动态时间戳文件夹** | 每次训练自动创建 `YYYY-MM-DD_HH-MM-SS` 文件夹 |
+
+### 唯一修改
+
+所有脚本只添加了**一行代码**来支持外部包环境：
+
+```python
+import isaaclab_tasks  # noqa: F401
+import desktop_organizer  # noqa: F401  # ← 唯一添加的行
+```
+
+这样既能识别外部包环境，又保持与官方脚本**功能完全对等**。
+
+**详细说明**：
+- [Bug 修复总结](../../root/isaaclab-desktop-organizer/tests/BUG_FIX_SUMMARY_2026-01-27.md) - 修复的所有问题和解决方案
+- [脚本对齐完成报告](../../root/isaaclab-desktop-organizer/tests/SCRIPTS_ALIGNMENT_COMPLETE.md) - 详细的功能对比
 
 ---
 
@@ -31,7 +67,7 @@
 
 ### 前置要求
 
-1. **Isaac Lab 0.5.0+** - 必须先安装 Isaac Lab（不能通过 pip 安装）
+1. **Isaac Lab 0.53.0+** 
 
 ```bash
 # 克隆 Isaac Lab 仓库
@@ -43,12 +79,11 @@ cd IsaacLab
 ./isaaclab.sh --install
 ```
 
-2. **Python 3.10+**
-3. **CUDA 11.8+**（用于 GPU 加速）
+2. **Python 3.11+**
+3. **CUDA 12.8+**
 
 ### 安装本包
 
-**重要**：必须在 IsaacLab 环境中安装！
 
 ```bash
 # 激活 IsaacLab 环境
@@ -82,7 +117,6 @@ pip install -e ".[bc]"
 | 环境 ID | 用途 |
 |---------|------|
 | `Isaac-Desktop-Organizer-Franka-IK-Rel-v0` | RL 训练 |
-| `Isaac-Desktop-Organizer-Franka-IK-Rel-Play-v0` | RL 推理评估 |
 | `Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0` | Mimic 数据采集 + BC 训练 |
 
 ### 1️⃣ 使用本项目脚本训练（推荐）
@@ -103,14 +137,21 @@ cd /path/to/IsaacLab
   --max_iterations 3000 \
   --headless
 
-# 继续训练
+# 继续训练（查找最新的训练运行）
+LATEST_RUN=$(ls -t ./logs/rsl_rl/desktop_organizer/ | head -1)
 ./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
   --num_envs 4096 \
   --max_iterations 5000 \
   --resume \
-  --load_run 2026-01-23_17-58-10 \
+  --load_run $LATEST_RUN \
   --headless
 ```
+
+**说明**：
+- `--load_run` 参数是一个**时间戳格式的文件夹名**（如 `2026-01-23_17-58-10`）
+- 每次训练都会创建**新的时间戳文件夹**，不会覆盖之前的模型
+- Resume 训练会从指定的检查点加载，但保存到新的文件夹
+- 使用 `ls -t ./logs/rsl_rl/desktop_organizer/ | head -1` 可以找到最新的训练运行
 
 **预期结果**：
 - 快速测试（10 轮）：约 1-2 分钟
@@ -118,50 +159,88 @@ cd /path/to/IsaacLab
 - 成功率：2500 轮后达到 80-85%
 - Episode 长度：平均 4.2 秒
 
-**训练日志位置**：`./logs/rsl_rl/desktop_organizer/`
+**训练日志位置**：`./logs/rsl_rl/desktop_organizer/{timestamp}/`
+
+**查看所有训练运行**：
+```bash
+ls -lt ./logs/rsl_rl/desktop_organizer/
+```
 
 ### 2️⃣ 可视化训练好的策略
 
 ```bash
-# 使用本项目脚本
+# 找到最新的训练运行
+LATEST_RUN=$(ls -t ./logs/rsl_rl/desktop_organizer/ | head -1)
+
+# 使用本项目脚本评估
 ./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/play_rl.py \
-  --load_run 2026-01-23_17-58-10 \
+  --load_run $LATEST_RUN \
   --num_envs 16
 ```
 
+**说明**：`--load_run` 指定要评估的训练运行时间戳（如 `2026-01-23_17-58-10`）
+
 ### 3️⃣ 使用模仿学习训练（BC + MimicGen）
 
-使用 Isaac Lab 官方脚本配合本项目注册的环境：
+**重要**：外部包必须使用专用脚本（位于 `/root/isaaclab-desktop-organizer/scripts/`），不能使用 IsaacLab 官方脚本（官方脚本不导入外部包）。
 
 ```bash
-# 步骤 1：录制人工演示
 cd /path/to/IsaacLab
-./isaaclab.sh -p scripts/tools/record_demos.py \
+
+# 步骤 1：录制人工演示（10 条）
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/record_demos.py \
   --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
   --teleop_device keyboard \
   --dataset_file ./datasets/raw.hdf5 \
   --num_demos 10
 
 # 步骤 2：标注子任务边界
-python scripts/imitation_learning/isaaclab_mimic/annotate_demos.py \
-  --dataset ./datasets/raw.hdf5 \
-  --output ./datasets/annotated.hdf5
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/annotate_demos.py \
+  --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
+  --input_file ./datasets/raw.hdf5 \
+  --output_file ./datasets/annotated.hdf5
 
-# 步骤 3：使用 MimicGen 生成合成数据
-python scripts/imitation_learning/isaaclab_mimic/generate_dataset.py \
+# 步骤 3：使用 MimicGen 生成合成数据（100 条）
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/generate_dataset.py \
   --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
   --input_file ./datasets/annotated.hdf5 \
   --output_file ./datasets/generated.hdf5 \
   --generation_num_trials 100 \
-  --num_envs 100
+  --num_envs 100 \
+  --headless
 
-# 步骤 4：训练 BC 策略
-./isaaclab.sh -p scripts/imitation_learning/robomimic/train.py \
-  --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
+# 步骤 4：添加训练/验证分割（Robomimic 要求）
+python << 'EOF'
+import h5py
+import numpy as np
+with h5py.File('./datasets/generated.hdf5', 'r+') as f:
+    demos = list(f['data'].keys())
+    train_count = int(len(demos) * 0.8)
+    for i, demo_name in enumerate(demos):
+        if 'mask' not in f[f'data/{demo_name}']:
+            f[f'data/{demo_name}'].create_dataset('mask', data=np.array([1 if i < train_count else 0], dtype=np.int8))
+    if 'mask' not in f:
+        f.create_group('mask')
+    if 'train' in f['mask']:
+        del f['mask/train']
+    if 'valid' in f['mask']:
+        del f['mask/valid']
+    f.create_dataset('mask/train', data=np.array([d.encode('utf-8') for d in demos[:train_count]], dtype='S'))
+    f.create_dataset('mask/valid', data=np.array([d.encode('utf-8') for d in demos[train_count:]], dtype='S'))
+    print(f"✅ 80% 训练集 ({train_count}), 20% 验证集 ({len(demos) - train_count})")
+EOF
+
+# 步骤 5：训练 BC 策略（200 轮）
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_bc.py \
+  --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
   --algo bc \
   --dataset ./datasets/generated.hdf5 \
   --epochs 200
 ```
+
+**为什么必须用外部包脚本？**
+
+IsaacLab 官方脚本只导入主项目环境（`isaaclab_tasks`），不导入外部包（`desktop_organizer`）。详见 [外部包工具脚本完整指南](/root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_SCRIPTS_GUIDE.md)。
 
 详细说明请查看 [MimicGen 数据生成指南](docs/mimic_data_generation.md)
 
@@ -279,56 +358,21 @@ randomize_ketchup = EventTerm(
         },
     },
 )
-```
 
----
+```
 
 ## 📖 文档
 
+### 使用指南
 - [安装指南](docs/installation.md) - 详细的安装步骤
 - [MimicGen 数据生成指南](docs/mimic_data_generation.md) - 完整的模仿学习工作流程
 - [架构说明](#-项目架构) - 代码结构解释
 - [常见问题](docs/mimic_data_generation.md#-常见问题) - 问题排查
 
----
-
-## 🎯 简历亮点
-
-使用这个项目时，可以这样描述：
-
-### 中文版
-```
-独立开发了基于 Isaac Lab 的机器人操作任务 Python 包：
-• 设计完整的强化学习环境（支持 4096 个并行环境）
-• 实现自定义 MDP 组件（奖励函数、观测、终止条件）
-• 支持多种算法（PPO、BC + MimicGen 数据增强）
-• 标准 Python 包管理（pip 可安装，1300+ 行代码）
-• 训练成功率达 85%，episode 时长 4.2 秒
-• 开源：github.com/yourusername/isaaclab-desktop-organizer
-```
-
-### English Version
-```
-Developed a standalone robotic manipulation package for Isaac Lab:
-• Designed complete RL environment (4096 parallel environments)
-• Implemented custom MDP components (rewards, observations, terminations)
-• Supported multiple algorithms (PPO, BC with MimicGen augmentation)
-• Standard Python packaging (pip installable, 1300+ lines of code)
-• Achieved 85% success rate with 4.2s episode length
-• Open source: github.com/yourusername/isaaclab-desktop-organizer
-```
-
----
-
-## 🤝 贡献
-
-欢迎贡献！请：
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m '添加了某个特性'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 开启 Pull Request
+### 技术文档
+- **[Bug 修复总结 (2026-01-27)](../../root/isaaclab-desktop-organizer/tests/BUG_FIX_SUMMARY_2026-01-27.md)** - 脚本完全对齐官方版本的详细说明
+- **[脚本对齐完成报告](../../root/isaaclab-desktop-organizer/tests/SCRIPTS_ALIGNMENT_COMPLETE.md)** - 功能对比和验证方法
+- [外部包工具脚本完整指南](../../root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_SCRIPTS_GUIDE.md) - 为什么需要外部包专用脚本
 
 ---
 
@@ -349,9 +393,9 @@ Developed a standalone robotic manipulation package for Isaac Lab:
 
 ## 📧 联系方式
 
-- **作者**: 你的名字
-- **邮箱**: your.email@example.com
-- **GitHub**: [@your-username](https://github.com/your-username)
+- **作者**: zql
+- **邮箱**: zhangqianli58@gmail.com
+- **GitHub**: [sawfnalfhg](https://github.com/sawfnalfhg)
 
 ---
 
@@ -361,10 +405,10 @@ Developed a standalone robotic manipulation package for Isaac Lab:
 
 ```bibtex
 @software{isaaclab_desktop_organizer_2026,
-  author = {你的名字},
-  title = {IsaacLab Desktop Organizer: 基于强化学习和模仿学习的机器人操作},
+  author = {sawfnalfhg},
+  title = {IsaacLab Desktop Organizer: 基于强化学习和模仿学习的桌面收纳任务},
   year = {2026},
-  url = {https://github.com/your-username/isaaclab-desktop-organizer}
+  url = {https://github.com/sawfnalfhg/isaaclab-desktop-organizer}
 }
 ```
 
@@ -376,199 +420,6 @@ Developed a standalone robotic manipulation package for Isaac Lab:
 
 ---
 
-## 🔧 故障排查
-
-### 常见错误 1: "No module named 'omni.log'"
-
-**错误现象**：
-```bash
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py
-# ModuleNotFoundError: No module named 'omni.log'
-```
-
-**原因**：Isaac Sim 未正确初始化
-
-**解决**：此错误已在 `train_rl.py` 中修复，确保使用最新版本的脚本。脚本会自动调用 `AppLauncher` 初始化 Isaac Sim。
-
----
-
-### 常见错误 2: "ManagerBasedRLEnv.__init__() missing 1 required positional argument: 'cfg'"
-
-**错误现象**：
-```python
-env = gym.make("Isaac-Desktop-Organizer-Franka-IK-Rel-v0", num_envs=512)
-# TypeError: missing 1 required positional argument: 'cfg'
-```
-
-**原因**：IsaacLab 环境需要显式传递配置对象
-
-**解决**：此错误已在 `train_rl.py` 中修复。脚本会自动调用 `parse_env_cfg()` 解析配置。
-
----
-
-### 常见错误 3: "'OrderEnforcing' object has no attribute 'get_observations'"
-
-**错误现象**：训练时报错缺少 `get_observations` 方法
-
-**原因**：环境未用 `RslRlVecEnvWrapper` 包装
-
-**解决**：此错误已在 `train_rl.py` 中修复。脚本会自动调用 `RslRlVecEnvWrapper` 包装环境。
-
----
-
-### 验证安装
-
-运行以下测试脚本验证安装正确：
-
-```bash
-# 进入 IsaacLab 目录
-cd /path/to/IsaacLab
-
-# 快速测试（10 轮迭代，1-2 分钟）
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
-  --num_envs 512 \
-  --max_iterations 10 \
-  --headless
-```
-
-**预期输出**：
-```
-[INFO] Parsing environment config for: Isaac-Desktop-Organizer-Franka-IK-Rel-v0
-[INFO] Creating environment: Isaac-Desktop-Organizer-Franka-IK-Rel-v0
-[INFO] Wrapping environment with RslRlVecEnvWrapper...
-[INFO] Creating PPO runner...
-[INFO] Starting training for 10 iterations...
-================================================================================
-# ... 训练进度
-================================================================================
-[INFO] Training complete!
-```
-
-如果以上输出正常，说明安装成功！
-
----
-
-## ❓ 常见问题（FAQ）
-
-### Q1: 我已经安装了 IsaacLab，如何使用这个项目？
-
-**答**：两个简单步骤：
-
-```bash
-# 1. 激活 IsaacLab 环境
-cd /path/to/IsaacLab
-source .venv/bin/activate
-
-# 2. 安装本项目
-cd ~/isaaclab-desktop-organizer
-pip install -e .
-
-# 3. 开始训练
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
-  --num_envs 4096 \
-  --headless
-```
-
-### Q2: 为什么不能用 IsaacLab 官方的 train.py？
-
-**答**：官方 `train.py` 只导入了主项目环境（`isaaclab_tasks`），没有导入外部包（`desktop_organizer`）：
-
-```python
-# 官方 train.py 第 96 行
-import isaaclab_tasks  # noqa: F401
-# ❌ 没有 import desktop_organizer
-```
-
-**解决方案**：使用本项目提供的 `train_rl.py` 脚本，该脚本已修复所有问题并优化参数默认值。
-
-### Q3: 为什么需要安装本项目？不能直接用吗？
-
-**答**：本项目需要安装的原因：
-1. ✅ 注册 Gym 环境 ID（`Isaac-Desktop-Organizer-Franka-IK-Rel-v0`）
-2. ✅ 安装自定义奖励函数（`object_command_progress`, `gripper_closed_at_goal`）
-3. ✅ 配置场景资产路径
-
-安装后，IsaacLab 的所有官方脚本都能识别你的环境。
-
-### Q4: 训练脚本的关键修复有哪些？
-
-**答**：`train_rl.py` 脚本经过以下关键修复：
-
-1. ✅ **自动初始化 Isaac Sim**：调用 `AppLauncher` 初始化
-2. ✅ **正确解析配置**：使用 `parse_env_cfg()` 生成环境配置
-3. ✅ **环境包装**：用 `RslRlVecEnvWrapper` 包装，兼容 RSL-RL
-4. ✅ **参数优化**：移除冲突参数，使用最佳默认值
-
-详细修复记录请查看 `/root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_FIXES.md`
-
-### Q5: 如何验证环境注册成功？
-
-```bash
-cd /path/to/IsaacLab
-source .venv/bin/activate
-
-python -c "
-import desktop_organizer
-import gymnasium as gym
-print('✅ 已注册环境:', [spec.id for spec in gym.envs.registry.values() if 'Desktop-Organizer' in spec.id])
-"
-```
-
-**预期输出**：
-```
-✅ 已注册环境: ['Isaac-Desktop-Organizer-Franka-IK-Rel-v0',
-                'Isaac-Desktop-Organizer-Franka-IK-Rel-Play-v0',
-                'Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0']
-```
-
-### Q6: 训练时出现 `ModuleNotFoundError: No module named 'desktop_organizer'`
-
-**原因**：未安装本项目或未激活正确的环境
-
-**解决**：
-```bash
-# 1. 确认在 IsaacLab 环境中
-cd /path/to/IsaacLab
-source .venv/bin/activate
-
-# 2. 重新安装
-cd ~/isaaclab-desktop-organizer
-pip install -e .
-
-# 3. 验证
-python -c "import desktop_organizer; print('✅ 安装成功')"
-```
-
-### Q7: 我的主项目和外部包环境 ID 有什么区别？
-
-**答**：命名略有不同，但功能相同：
-
-| 功能 | 主项目 | 外部包（本项目） |
-|------|--------|-----------------|
-| **RL 训练** | `Isaac-Desktop-Organizer-Franka-**RL-IK-Rel**-v0` | `Isaac-Desktop-Organizer-Franka-**IK-Rel**-v0` |
-| **Mimic** | `Isaac-Desktop-Organizer-Franka-**IK-Rel-Mimic**-v0` | `Isaac-Desktop-Organizer-Franka-**Mimic-IK-Rel**-v0` |
-
-主项目 RL 环境多了 `RL-` 前缀，Mimic 环境的 `Mimic` 位置不同。
-
-### Q8: 能否不安装，直接把代码复制到 IsaacLab 里？
-
-**可以，但不推荐**。如果一定要这样做：
-
-```bash
-# 将你的包复制到 IsaacLab 的 source 目录
-cp -r ~/isaaclab-desktop-organizer/desktop_organizer \
-      /path/to/IsaacLab/source/extensions/isaaclab.ext/isaaclab_tasks/
-
-# 注册环境（在 IsaacLab 的 __init__.py 中添加）
-# 但这样会修改 IsaacLab 源码，不建议
-```
-
-**为什么不推荐**：
-- ❌ 修改了 IsaacLab 源码
-- ❌ 升级 IsaacLab 时会丢失你的代码
-- ❌ 难以版本控制
-
----
 
 ## 🔍 相关资源
 
@@ -576,14 +427,18 @@ cp -r ~/isaaclab-desktop-organizer/desktop_organizer \
 - [强化学习训练完整教程](docs/installation.md#step-3-run-a-quick-training-test-10-iterations)
 - [MimicGen 数据生成完整流程](docs/mimic_data_generation.md#-完整数据流程)
 - [自定义奖励函数教程](docs/mimic_data_generation.md#-mimic-配置在环境中定义)
-- [**训练脚本修复记录**](/root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_FIXES.md) - 详细记录所有问题和解决方案
+
+### 技术文档（重要！）
+- **[Bug 修复总结 (2026-01-27)](../../root/isaaclab-desktop-organizer/tests/BUG_FIX_SUMMARY_2026-01-27.md)** ⭐ 脚本完全对齐官方版本的详细说明
+- **[脚本对齐完成报告](../../root/isaaclab-desktop-organizer/tests/SCRIPTS_ALIGNMENT_COMPLETE.md)** - 功能对比和验证方法
+- [外部包工具脚本完整指南](../../root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_SCRIPTS_GUIDE.md) - 为什么需要外部包专用脚本
 
 ### 常见问题
 - [为什么机械臂抓着不放？](docs/mimic_data_generation.md#1-生成成功率低--30)
 - [如何调整随机化范围？](#自定义物体随机化范围)
 - [如何修改网络结构？](#自定义-ppo-超参数)
 - [为什么不能用官方 train.py？](#q2-为什么不能用-isaaclab-官方的-trainpy)
-- [训练脚本做了哪些修复？](#q4-训练脚本的关键修复有哪些)
+- [训练脚本与官方有什么区别？](#q4-训练脚本与官方有什么区别)
 
 ---
 
