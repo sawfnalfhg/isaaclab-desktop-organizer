@@ -88,14 +88,14 @@ pip install -e ".[bc]"
 cd /path/to/IsaacLab
 
 # 快速测试
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/rl/train_rl.py \
   --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
   --num_envs 512 \
   --max_iterations 10 \
   --headless
 
 # 完整训练
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/rl/train_rl.py \
   --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
   --num_envs 4096 \
   --max_iterations 3000 \
@@ -103,7 +103,7 @@ cd /path/to/IsaacLab
 
 # 继续训练（查找最新的训练运行）
 LATEST_RUN=$(ls -t ./logs/rsl_rl/desktop_organizer/ | head -1)
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/rl/train_rl.py \
   --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
   --num_envs 4096 \
   --max_iterations 5000 \
@@ -138,7 +138,7 @@ ls -lt ./logs/rsl_rl/desktop_organizer/
 LATEST_RUN=$(ls -t ./logs/rsl_rl/desktop_organizer/ | head -1)
 
 # 使用本项目脚本评估
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/play_rl.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/rl/play_rl.py \
   --load_run $LATEST_RUN \
   --num_envs 16
 ```
@@ -153,20 +153,20 @@ LATEST_RUN=$(ls -t ./logs/rsl_rl/desktop_organizer/ | head -1)
 cd /path/to/IsaacLab
 
 # 步骤 1：录制人工演示（10 条）
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/record_demos.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/bc/record_demos.py \
   --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
   --teleop_device keyboard \
   --dataset_file ./datasets/raw.hdf5 \
   --num_demos 10
 
 # 步骤 2：标注子任务边界
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/annotate_demos.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/bc/annotate_demos.py \
   --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
   --input_file ./datasets/raw.hdf5 \
   --output_file ./datasets/annotated.hdf5
 
 # 步骤 3：使用 MimicGen 生成合成数据（100 条）
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/generate_dataset.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/bc/generate_dataset.py \
   --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
   --input_file ./datasets/annotated.hdf5 \
   --output_file ./datasets/generated.hdf5 \
@@ -175,7 +175,7 @@ cd /path/to/IsaacLab
   --headless
 
 # 步骤 4：训练 BC 策略（200 轮）
-./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_bc.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/bc/train_bc.py \
   --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
   --algo bc \
   --dataset ./datasets/generated.hdf5 \
@@ -185,7 +185,7 @@ cd /path/to/IsaacLab
 
 ```bash
 # 步骤 5: 使用训练好的 BC 模型进行评估
-./isaaclab.sh -p scripts/imitation_learning/robomimic/play.py \
+./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/bc/play_bc.py \
   --task Isaac-Desktop-Organizer-Franka-IK-Rel-Mimic-v0 \
   --checkpoint ./logs/robomimic/Isaac-Desktop-Organizer-Franka-IK-Rel-Mimic-v0/bc/<timestamp>/models/model_epoch_200.pth \
   --num_envs 1 \
@@ -251,8 +251,15 @@ isaaclab-desktop-organizer/          # 独立包
 │   │   └── robomimic/bc.json       # BC 配置
 │   └── assets/                      # 机器人/场景资产
 ├── scripts/                         # 训练脚本
-│   ├── train_rl.py                 # RL 训练
-│   └── play_rl.py                  # RL 评估
+│   ├── rl/                          # 强化学习脚本
+│   │   ├── train_rl.py             # RL 训练
+│   │   └── play_rl.py              # RL 评估
+│   └── bc/                          # 模仿学习脚本
+│       ├── record_demos.py         # 录制演示
+│       ├── annotate_demos.py       # 标注子任务
+│       ├── generate_dataset.py     # 生成数据
+│       ├── train_bc.py             # BC 训练
+│       └── play_bc.py              # BC 评估
 ├── docs/                            # 文档
 │   ├── installation.md             # 安装指南
 │   └── mimic_data_generation.md    # Mimic 数据生成指南
