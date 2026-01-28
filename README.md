@@ -1,14 +1,10 @@
 # 🤖 IsaacLab 桌面收纳任务
 
-[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Isaac Lab](https://img.shields.io/badge/Isaac%20Lab-0.5.0+-green.svg)](https://isaac-sim.github.io/IsaacLab/)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Isaac Lab](https://img.shields.io/badge/Isaac%20Lab-0.53.0+-green.svg)](https://isaac-sim.github.io/IsaacLab/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 一个**专业级的强化学习独立包**，用于 Isaac Lab 中的 Franka 机械臂操作任务。训练机器人将物体抓取并放入篮子，支持最先进的强化学习和模仿学习算法。
-
-<p align="center">
-  <img src="https://via.placeholder.com/800x400?text=Demo+视频+待添加" alt="演示">
-</p>
 
 ---
 
@@ -18,48 +14,14 @@
 |------|------|
 | **任务** | 抓取 ketchup 并放入篮子（可扩展到 3+ 个物体） |
 | **机器人** | Franka Panda 机械臂 + 平行夹爪 |
-| **控制方式** | 微分 IK（相对位姿控制） |
-| **观测空间** | 关节状态 + 物体位姿 + 目标指令 |
-| **奖励设计** | 稠密奖励：接近、抓取、举起、追踪、成功 |
+| **控制方式** |  IK（相对位姿控制） |
+| **观测空间** | 关节状态 + 物体位姿  |
+| **奖励设计** | 稠密奖励：接近、抓取、举起、追踪 |
 | **数据增强** | MimicGen（10 条演示 → 100+ 条） |
 | **算法支持** | RSL-RL (PPO) + Robomimic (BC) |
 | **并行训练** | 4096 个并行环境，快速训练 |
-| **工具脚本** | **官方完整版**（与 IsaacLab 功能完全一致） |
 
----
 
-## 🎯 重要说明：工具脚本已完全对齐官方版本
-
-> **✅ 2026-01-27 更新**：所有训练和数据采集脚本已替换为 **IsaacLab 官方完整版本**，功能与官方脚本完全一致。
-
-### 包含的完整功能
-
-所有脚本（`train_rl.py`, `play_rl.py`, `record_demos.py` 等）都是官方脚本的完整副本，包括：
-
-| 功能 | 说明 |
-|------|------|
-| ✅ **Hydra 配置系统** | 动态加载环境和算法配置 |
-| ✅ **种子设置** | `env_cfg.seed = agent_cfg.seed` 确保实验可重现 |
-| ✅ **配置文件导出** | 自动保存 `env.yaml` 和 `agent.yaml` 到日志目录 |
-| ✅ **Git 仓库追踪** | `runner.add_git_repo_to_log()` 记录代码版本 |
-| ✅ **视频录制** | `--video` 参数支持训练过程可视化 |
-| ✅ **多 GPU 训练** | `--distributed` 参数支持分布式训练 |
-| ✅ **动态时间戳文件夹** | 每次训练自动创建 `YYYY-MM-DD_HH-MM-SS` 文件夹 |
-
-### 唯一修改
-
-所有脚本只添加了**一行代码**来支持外部包环境：
-
-```python
-import isaaclab_tasks  # noqa: F401
-import desktop_organizer  # noqa: F401  # ← 唯一添加的行
-```
-
-这样既能识别外部包环境，又保持与官方脚本**功能完全对等**。
-
-**详细说明**：
-- [Bug 修复总结](../../root/isaaclab-desktop-organizer/tests/BUG_FIX_SUMMARY_2026-01-27.md) - 修复的所有问题和解决方案
-- [脚本对齐完成报告](../../root/isaaclab-desktop-organizer/tests/SCRIPTS_ALIGNMENT_COMPLETE.md) - 详细的功能对比
 
 ---
 
@@ -93,7 +55,7 @@ source .venv/bin/activate  # Linux/Mac
 
 # 克隆本仓库
 cd ..
-git clone https://github.com/<your-username>/isaaclab-desktop-organizer.git
+git clone https://github.com/sawfnalfhg/isaaclab-desktop-organizer.git
 cd isaaclab-desktop-organizer
 
 # 安装本包（开发模式）
@@ -119,20 +81,22 @@ pip install -e ".[bc]"
 | `Isaac-Desktop-Organizer-Franka-IK-Rel-v0` | RL 训练 |
 | `Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0` | Mimic 数据采集 + BC 训练 |
 
-### 1️⃣ 使用本项目脚本训练（推荐）
+### 1️⃣ 使用本项目脚本训练
 
 ```bash
 # 进入 IsaacLab 目录
 cd /path/to/IsaacLab
 
-# 快速测试（10 轮迭代，约 1-2 分钟）
+# 快速测试
 ./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+  --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
   --num_envs 512 \
   --max_iterations 10 \
   --headless
 
-# 完整训练（3000 轮迭代）
+# 完整训练
 ./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+  --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
   --num_envs 4096 \
   --max_iterations 3000 \
   --headless
@@ -140,6 +104,7 @@ cd /path/to/IsaacLab
 # 继续训练（查找最新的训练运行）
 LATEST_RUN=$(ls -t ./logs/rsl_rl/desktop_organizer/ | head -1)
 ./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_rl.py \
+  --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
   --num_envs 4096 \
   --max_iterations 5000 \
   --resume \
@@ -156,8 +121,8 @@ LATEST_RUN=$(ls -t ./logs/rsl_rl/desktop_organizer/ | head -1)
 **预期结果**：
 - 快速测试（10 轮）：约 1-2 分钟
 - 完整训练（3000 轮）：约 2-3 小时（RTX 4090）
-- 成功率：2500 轮后达到 80-85%
-- Episode 长度：平均 4.2 秒
+- 成功率：2500 轮后达到 95%
+
 
 **训练日志位置**：`./logs/rsl_rl/desktop_organizer/{timestamp}/`
 
@@ -178,7 +143,7 @@ LATEST_RUN=$(ls -t ./logs/rsl_rl/desktop_organizer/ | head -1)
   --num_envs 16
 ```
 
-**说明**：`--load_run` 指定要评估的训练运行时间戳（如 `2026-01-23_17-58-10`）
+
 
 ### 3️⃣ 使用模仿学习训练（BC + MimicGen）
 
@@ -209,33 +174,22 @@ cd /path/to/IsaacLab
   --num_envs 100 \
   --headless
 
-# 步骤 4：添加训练/验证分割（Robomimic 要求）
-python << 'EOF'
-import h5py
-import numpy as np
-with h5py.File('./datasets/generated.hdf5', 'r+') as f:
-    demos = list(f['data'].keys())
-    train_count = int(len(demos) * 0.8)
-    for i, demo_name in enumerate(demos):
-        if 'mask' not in f[f'data/{demo_name}']:
-            f[f'data/{demo_name}'].create_dataset('mask', data=np.array([1 if i < train_count else 0], dtype=np.int8))
-    if 'mask' not in f:
-        f.create_group('mask')
-    if 'train' in f['mask']:
-        del f['mask/train']
-    if 'valid' in f['mask']:
-        del f['mask/valid']
-    f.create_dataset('mask/train', data=np.array([d.encode('utf-8') for d in demos[:train_count]], dtype='S'))
-    f.create_dataset('mask/valid', data=np.array([d.encode('utf-8') for d in demos[train_count:]], dtype='S'))
-    print(f"✅ 80% 训练集 ({train_count}), 20% 验证集 ({len(demos) - train_count})")
-EOF
-
-# 步骤 5：训练 BC 策略（200 轮）
+# 步骤 4：训练 BC 策略（200 轮）
 ./isaaclab.sh -p /root/isaaclab-desktop-organizer/scripts/train_bc.py \
   --task Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0 \
   --algo bc \
   --dataset ./datasets/generated.hdf5 \
   --epochs 200
+
+  ### Step 5: 评估训练好的 BC 策略
+
+```bash
+# 步骤 5: 使用训练好的 BC 模型进行评估
+./isaaclab.sh -p scripts/imitation_learning/robomimic/play.py \
+  --task Isaac-Desktop-Organizer-Franka-IK-Rel-Mimic-v0 \
+  --checkpoint ./logs/robomimic/Isaac-Desktop-Organizer-Franka-IK-Rel-Mimic-v0/bc/<timestamp>/models/model_epoch_200.pth \
+  --num_envs 1 \
+  --num_rollouts 10
 ```
 
 **为什么必须用外部包脚本？**
@@ -252,7 +206,7 @@ IsaacLab 官方脚本只导入主项目环境（`isaaclab_tasks`），不导入�
 
 | 指标 | 数值 |
 |------|------|
-| **成功率** | 85% |
+| **成功率** | 95% |
 | **Episode 长度** | 4.2 秒（平均） |
 | **训练轮数** | 2500 |
 | **并行环境数** | 4096 |
@@ -276,7 +230,7 @@ gripper_closed_penalty: -100.0                # 强制松开夹爪
 |------|------|
 | **源演示数量** | 10 |
 | **生成演示数量** | 100 |
-| **成功率** | 75% |
+| **成功率** | 50% |
 | **训练轮数** | 200 |
 
 ---
@@ -307,12 +261,6 @@ isaaclab-desktop-organizer/          # 独立包
         └── Collected_table_clean/
             └── table_clean.usd     # 桌面场景（29KB）
 ```
-
-**设计原则**：
-- ✅ 不修改 Isaac Lab 源码
-- ✅ 标准 Gym 接口
-- ✅ 模块化 MDP 组件
-- ✅ 基于配置的定制
 
 ---
 
