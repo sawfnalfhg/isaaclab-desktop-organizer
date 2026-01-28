@@ -1,7 +1,15 @@
 """Isaac Lab Mimic environment config for Franka Desktop Organizer IK Rel task."""
 
 from isaaclab.envs.mimic_env_cfg import MimicEnvCfg, SubTaskConfig
+from isaaclab.managers import EventTermCfg as EventTerm
+from isaaclab.managers import ObservationGroupCfg as ObsGroup
+from isaaclab.managers import ObservationTermCfg as ObsTerm
+from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils import configclass
+
+from isaaclab_tasks.manager_based.manipulation.place import mdp as place_mdp
+from isaaclab_tasks.manager_based.manipulation.stack import mdp as stack_mdp
+from isaaclab_tasks.manager_based.manipulation.stack.mdp import franka_stack_events
 
 from desktop_organizer.envs.rl_env_cfg import FrankaDesktopOrganizerIKRelEnvCfg
 
@@ -119,3 +127,76 @@ class FrankaDesktopOrganizerIKRelMimicEnvCfg(FrankaDesktopOrganizerIKRelEnvCfg, 
 
         # Assign subtask configs to the "franka" end-effector
         self.subtask_configs["franka"] = subtask_configs
+
+        # Override observations for Mimic environment (match dataset structure)
+        # Only include observations that exist in the generated dataset
+        @configclass
+        class MimicPolicyCfg(ObsGroup):
+            """Observations for Mimic policy (matches dataset)."""
+
+            actions = ObsTerm(func=stack_mdp.last_action)
+            joint_pos = ObsTerm(func=stack_mdp.joint_pos_rel)
+            joint_vel = ObsTerm(func=stack_mdp.joint_vel_rel)
+            eef_pos = ObsTerm(func=stack_mdp.ee_frame_pos, params={"ee_frame_cfg": SceneEntityCfg("ee_frame")})
+            eef_quat = ObsTerm(func=stack_mdp.ee_frame_quat, params={"ee_frame_cfg": SceneEntityCfg("ee_frame")})
+            gripper_pos = ObsTerm(func=stack_mdp.gripper_pos)
+            ketchup_pos = ObsTerm(
+                func=place_mdp.object_poses_in_base_frame,
+                params={"object_cfg": SceneEntityCfg("ketchup"), "return_key": "pos"},
+            )
+            ketchup_quat = ObsTerm(
+                func=place_mdp.object_poses_in_base_frame,
+                params={"object_cfg": SceneEntityCfg("ketchup"), "return_key": "quat"},
+            )
+            basket_pos = ObsTerm(
+                func=place_mdp.object_poses_in_base_frame,
+                params={"object_cfg": SceneEntityCfg("basket"), "return_key": "pos"},
+            )
+            basket_quat = ObsTerm(
+                func=place_mdp.object_poses_in_base_frame,
+                params={"object_cfg": SceneEntityCfg("basket"), "return_key": "quat"},
+            )
+
+            def __post_init__(self):
+                self.enable_corruption = False
+                self.concatenate_terms = False
+
+        # Replace the policy observation configuration
+        self.observations.policy = MimicPolicyCfg()
+
+        # Override randomization ranges for Mimic environment (match main project)
+        # Ketchup: very small range (3cm x 4cm)
+        self.events.randomize_ketchup = EventTerm(
+            func=franka_stack_events.randomize_object_pose,
+            mode="reset",
+            params={
+                "pose_range": {
+                    "x": (1.315, 1.345),  # 3cm range (match main project)
+                    "y": (1.475, 1.515),  # 4cm range (match main project)
+                    "z": (0.50771, 0.50771),
+                    "roll": (1.5708, 1.5708),
+                    "pitch": (0.0, 0.0),
+                    "yaw": (-0.15, 0.15),  # ±8.6° (match main project)
+                },
+                "min_separation": 0.0,
+                "asset_cfgs": [SceneEntityCfg("ketchup")],
+            },
+        )
+
+        # Basket: small range (6cm x 6cm)
+        self.events.randomize_basket = EventTerm(
+            func=franka_stack_events.randomize_object_pose,
+            mode="reset",
+            params={
+                "pose_range": {
+                    "x": (1.73, 1.79),  # 6cm range (match main project)
+                    "y": (1.45, 1.51),  # 6cm range (match main project)
+                    "z": (0.48, 0.48),
+                    "roll": (0.0, 0.0),
+                    "pitch": (0.0, 0.0),
+                    "yaw": (-0.5, 0.5),
+                },
+                "min_separation": 0.0,
+                "asset_cfgs": [SceneEntityCfg("basket")],
+            },
+        )

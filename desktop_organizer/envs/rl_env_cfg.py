@@ -184,10 +184,37 @@ class ObservationsCfg:
         joint_pos = ObsTerm(func=isaaclab_mdp.joint_pos_rel)
         joint_vel = ObsTerm(func=isaaclab_mdp.joint_vel_rel)
 
-        # Ketchup position (in robot root frame)
+        # End-effector pose (required for Mimic environment)
+        eef_pos = ObsTerm(func=stack_mdp.ee_frame_pos, params={"ee_frame_cfg": SceneEntityCfg("ee_frame")})
+        eef_quat = ObsTerm(func=stack_mdp.ee_frame_quat, params={"ee_frame_cfg": SceneEntityCfg("ee_frame")})
+
+        # Gripper position (required for BC training)
+        gripper_pos = ObsTerm(func=stack_mdp.gripper_pos)
+
+        # Ketchup position and orientation (for BC training)
+        ketchup_pos = ObsTerm(
+            func=place_mdp.object_poses_in_base_frame,
+            params={"object_cfg": SceneEntityCfg("ketchup"), "return_key": "pos"},
+        )
+        ketchup_quat = ObsTerm(
+            func=place_mdp.object_poses_in_base_frame,
+            params={"object_cfg": SceneEntityCfg("ketchup"), "return_key": "quat"},
+        )
+
+        # Basket position and orientation (for BC training)
+        basket_pos = ObsTerm(
+            func=place_mdp.object_poses_in_base_frame,
+            params={"object_cfg": SceneEntityCfg("basket"), "return_key": "pos"},
+        )
+        basket_quat = ObsTerm(
+            func=place_mdp.object_poses_in_base_frame,
+            params={"object_cfg": SceneEntityCfg("basket"), "return_key": "quat"},
+        )
+
+        # Ketchup position (in robot root frame) - for RL training
         object_position = ObsTerm(func=mdp.object_position_in_robot_root_frame, params={"object_cfg": SceneEntityCfg("ketchup")})
 
-        # Target position (basket center above)
+        # Target position (basket center above) - for RL training
         target_object_position = ObsTerm(func=isaaclab_mdp.generated_commands, params={"command_name": "object_pose"})
 
         # Previous actions

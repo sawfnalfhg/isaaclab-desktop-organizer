@@ -18,6 +18,7 @@ gym.register(
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     kwargs={
         "env_cfg_entry_point": "desktop_organizer.envs.rl_env_cfg:FrankaDesktopOrganizerIKRelEnvCfg",
+        "rsl_rl_cfg_entry_point": "desktop_organizer.config.ppo_cfg:DesktopOrganizerPPORunnerCfg",
     },
     disable_env_checker=True,
 )
@@ -27,6 +28,7 @@ gym.register(
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     kwargs={
         "env_cfg_entry_point": "desktop_organizer.envs.rl_env_cfg:FrankaDesktopOrganizerIKRelEnvCfg_PLAY",
+        "rsl_rl_cfg_entry_point": "desktop_organizer.config.ppo_cfg:DesktopOrganizerPPORunnerCfg",
     },
     disable_env_checker=True,
 )
@@ -38,7 +40,7 @@ gym.register(
     entry_point="desktop_organizer.envs.mimic_env:FrankaDesktopOrganizerIKRelMimicEnv",
     kwargs={
         "env_cfg_entry_point": "desktop_organizer.envs.mimic_env_cfg:FrankaDesktopOrganizerIKRelMimicEnvCfg",
-        "robomimic_bc_cfg_entry_point": "desktop_organizer/config/robomimic/bc.json",
+        "robomimic_bc_cfg_entry_point": "/root/isaaclab-desktop-organizer/desktop_organizer/config/robomimic/bc.json",
     },
     disable_env_checker=True,
 )
