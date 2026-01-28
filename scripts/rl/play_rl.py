@@ -98,9 +98,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     env_cfg.sim.device = args_cli.device if args_cli.device is not None else env_cfg.sim.device
 
     # specify directory for logging experiments
-    # Load logs from project directory instead of IsaacLab directory
-    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    log_root_path = os.path.join(project_dir, "logs", "rsl_rl", agent_cfg.experiment_name)
+    # Use current working directory for logs (user should cd to project directory first)
+    log_root_path = os.path.join(os.getcwd(), "logs", "rsl_rl", agent_cfg.experiment_name)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
     if args_cli.use_pretrained_checkpoint:
         resume_path = get_published_pretrained_checkpoint("rsl_rl", train_task_name)

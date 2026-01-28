@@ -132,9 +132,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         agent_cfg.seed = seed
 
     # specify directory for logging experiments
-    # Save logs to project directory instead of IsaacLab directory
-    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    log_root_path = os.path.join(project_dir, "logs", "rsl_rl", agent_cfg.experiment_name)
+    # Use current working directory for logs (user should cd to project directory first)
+    log_root_path = os.path.join(os.getcwd(), "logs", "rsl_rl", agent_cfg.experiment_name)
     print(f"[INFO] Logging experiment in directory: {log_root_path}")
     # specify directory for logging runs: {time-stamp}_{run_name}
     log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

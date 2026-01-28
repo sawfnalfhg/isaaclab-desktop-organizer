@@ -392,9 +392,8 @@ def main(args: argparse.Namespace):
         config.train.num_epochs = args.epochs
 
     # change location of experiment directory
-    # Save logs to project directory instead of IsaacLab directory
-    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    config.train.output_dir = os.path.join(project_dir, "logs", args.log_dir, args.task)
+    # Use current working directory for logs (user should cd to project directory first)
+    config.train.output_dir = os.path.join(os.getcwd(), "logs", args.log_dir, args.task)
 
     log_dir, ckpt_dir, video_dir = TrainUtils.get_exp_dir(config)
 
