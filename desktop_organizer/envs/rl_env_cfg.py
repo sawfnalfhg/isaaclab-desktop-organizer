@@ -236,7 +236,7 @@ class RewardsCfg:
     reaching_object = RewTerm(
         func=mdp.object_ee_distance,
         params={"std": 0.1, "object_cfg": SceneEntityCfg("ketchup")},
-        weight=5.0,
+        weight=1.0,
     )
 
     # 2. Lifting: ketchup being lifted (reduced to avoid "holding and not releasing")
@@ -365,8 +365,8 @@ class EventCfg:
         mode="reset",
         params={
             "pose_range": {
-                "x": (1.25, 1.50),  # Medium generalization: 25cm range
-                "y": (1.40, 1.65),  # Medium generalization: 25cm range
+                "x": (1.30, 1.45),  
+                "y": (1.45, 1.60),  
                 "z": (0.50771, 0.50771),
                 "roll": (1.5708, 1.5708),
                 "pitch": (0.0, 0.0),

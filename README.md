@@ -81,7 +81,15 @@ pip install -e ".[bc]"
 | `Isaac-Desktop-Organizer-Franka-IK-Rel-v0` | RL 训练 |
 | `Isaac-Desktop-Organizer-Franka-Mimic-IK-Rel-v0` | Mimic 数据采集 + BC 训练 |
 
-### 1️⃣ 使用本项目脚本训练
+---
+
+# 🎯 强化学习训练 (Reinforcement Learning)
+
+本项目支持使用 **RSL-RL (PPO)** 进行强化学习训练，采用**三阶段训练策略**实现高成功率。
+
+---
+
+## 1️⃣ 快速开始：RL 训练
 
 **工作流程说明**：
 1. 进入外部包目录：`cd /root/isaaclab-desktop-organizer`
@@ -119,21 +127,194 @@ LATEST_RUN=$(ls -t logs/rsl_rl/desktop_organizer/ | head -1)
   --resume \
   --load_run $LATEST_RUN \
   --headless
+
+# 使用本项目脚本可视化训练好的策略
+/path/to/IsaacLab/isaaclab.sh -p scripts/rl/play_rl.py \
+  --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
+  --load_run $LATEST_RUN \
+  --num_envs 16
 ```
 
-**说明**：
-- **重要**：必须先 `cd /root/isaaclab-desktop-organizer` 进入项目目录，日志才会保存到正确位置
-- `--load_run` 参数是一个**时间戳格式的文件夹名**（如 `2026-01-23_17-58-10`）
-- 每次训练都会创建**新的时间戳文件夹**，不会覆盖之前的模型
-- Resume 训练会从指定的检查点加载，但保存到新的文件夹
-- 日志保存在：`./logs/rsl_rl/desktop_organizer/`（相对于当前目录）
-- 使用 `ls -t logs/rsl_rl/desktop_organizer/ | head -1` 可以找到最新的训练运行
+---
+
+## 2️⃣ 三阶段训练策略（推荐）
+
+本强化学习任务采用**分阶段训练策略**，需要手动修改配置文件并分阶段训练。
+
+#### 📊 三阶段训练策略总览
+
+| 阶段 | 训练目标 | 关键配置 | 训练轮数 | 训练时间（RTX 4090） |
+|------|---------|---------|---------|---------------------|
+| **阶段一** | 学习抓取和移动 | success_reward **注释掉**<br>gripper_penalty **注释掉** | 1000 | ~40 分钟 |
+| **阶段二** | 学会松手放入篮子 | success_reward **20000**<br>gripper_penalty **-100**<br>降低持续奖励权重 | +1000（续训） | ~40 分钟 |
+| **阶段三**<br>（可选） | 扩大随机范围泛化 | 扩大物体范围 25cm<br>提高 reaching 权重 | +1000（续训） | ~40 分钟 |
+
+---
+
+#### 📋 阶段一：学习抓取和移动（1000轮）
+
+**配置要求**（修改 `desktop_organizer/envs/rl_env_cfg.py`）：
+
+```python
+@configclass
+class RewardsCfg:
+    reaching_object = RewTerm(weight=2.0, ...)
+    lifting_object = RewTerm(weight=30.0, ...)
+    command_progress = RewTerm(weight=100.0, ...)
+    object_goal_tracking = RewTerm(weight=16.0, ...)
+    object_goal_tracking_fine_grained = RewTerm(weight=220.0, ...)
+
+    # ❌ 必须注释掉以下两项
+    # success_reward = RewTerm(weight=500.0, ...)
+    # gripper_closed_penalty = RewTerm(weight=-100.0, ...)
+```
+
+**为什么要注释掉 success_reward？**
+
+`success_reward` 函数（`object_a_is_into_b`）要求**三个条件同时满足**：
+1. ✅ 物体在篮子 XY 范围内（< 11cm）
+2. ✅ 物体高度接近篮子（< 20cm）
+3. ✅ **夹爪必须打开**（关键！）
+
+**问题**：
+- 如果启用 success_reward，机器人会发现**"推着物体走"比"抓着走"更容易获得奖励**
+- 推着走时夹爪本来就是打开的，到达目标后直接满足所有条件
+- 抓着走时夹爪是闭合的，到达目标后还需要打开夹爪（额外步骤）
+
+因此，阶段一**必须注释掉 success_reward**，让机器人专注学习稳定的抓取和移动。
+
+**训练命令**：
+
+```bash
+cd /root/isaaclab-desktop-organizer
+
+# 从头训练（1000 轮）
+/path/to/IsaacLab/isaaclab.sh -p scripts/rl/train_rl.py \
+  --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
+  --num_envs 4096 \
+  --max_iterations 1000 \
+  --headless
+```
 
 **预期结果**：
-- 快速测试（10 轮）：约 1-2 分钟
-- 完整训练（3000 轮）：约 2-3 小时（RTX 4090）
-- 成功率：2500 轮后达到 95%
+- ✅ 机器人学会用夹爪抓取 ketchup
+- ✅ 举起物体并移动到目标位置上方
+- ⚠️ **不会松手**（这是正常的，阶段二会解决）
+- ⚠️ 成功率显示为 0%（因为没有 success_reward）
 
+---
+
+#### 📋 阶段二：学会松手放入篮子（续训1000轮）
+
+**配置修改**（修改 `desktop_organizer/envs/rl_env_cfg.py`）：
+
+```python
+@configclass
+class RewardsCfg:
+    # 降低持续奖励权重
+    reaching_object = RewTerm(weight=1.0, ...)          # 2.0 → 1.0
+    lifting_object = RewTerm(weight=10.0, ...)          # 30.0 → 10.0
+    command_progress = RewTerm(weight=30.0, ...)        # 100.0 → 30.0
+    object_goal_tracking = RewTerm(weight=10.0, ...)    # 16.0 → 10.0
+    object_goal_tracking_fine_grained = RewTerm(weight=50.0, ...)  # 220.0 → 50.0
+
+    # ✅ 启用高权重 success_reward
+    success_reward = RewTerm(weight=20000.0, ...)       # 从注释改为 20000
+
+    # ✅ 启用 gripper_closed_penalty
+    gripper_closed_penalty = RewTerm(weight=-100.0, ...)
+```
+
+
+```
+
+**训练命令**（从阶段一续训）：
+
+```bash
+cd /root/isaaclab-desktop-organizer
+
+# 找到阶段一的 run_id
+ls -lt logs/rsl_rl/desktop_organizer/
+
+# 续训（假设阶段一的 run_id 是 2026-01-29_17-07-00）
+/path/to/IsaacLab/isaaclab.sh -p scripts/rl/train_rl.py \
+  --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
+  --num_envs 4096 \
+  --max_iterations 2000 \
+  --resume \
+  --load_run "2026-01-29_17-07-00" \
+  --headless
+```
+
+
+
+**预期结果**：
+- ✅ 机器人在到达目标位置后会打开夹爪
+- ✅ 成功将 ketchup 放入篮子
+- ✅ 成功率达到 90-95%
+
+---
+
+#### 📋 阶段三：扩大随机范围提升泛化（可选，续训1000轮）
+
+**配置修改**（修改 `desktop_organizer/envs/rl_env_cfg.py`）：
+
+```python
+@configclass
+class RewardsCfg:
+    # 提高导航奖励（因为物体可能更远）
+    reaching_object = RewTerm(weight=5.0, ...)          # 1.0 → 5.0
+
+    # 其他保持阶段二配置
+    lifting_object = RewTerm(weight=10.0, ...)
+    command_progress = RewTerm(weight=30.0, ...)
+    object_goal_tracking = RewTerm(weight=10.0, ...)
+    object_goal_tracking_fine_grained = RewTerm(weight=50.0, ...)
+    success_reward = RewTerm(weight=20000.0, ...)
+    gripper_closed_penalty = RewTerm(weight=-100.0, ...)
+
+@configclass
+class EventCfg:
+    # 扩大 ketchup 随机化范围
+    randomize_ketchup = EventTerm(
+        func=franka_stack_events.randomize_object_pose,
+        params={
+            "pose_range": {
+                "x": (1.25, 1.50),  # 15cm → 25cm
+                "y": (1.40, 1.65),  # 15cm → 25cm
+                "z": (0.50771, 0.50771),
+                "roll": (1.5708, 1.5708),
+                "pitch": (0.0, 0.0),
+                "yaw": (-0.3, 0.3),
+            },
+            "min_separation": 0.0,
+            "asset_cfgs": [SceneEntityCfg("ketchup")],
+        },
+    )
+```
+
+**训练命令**（从阶段二续训）：
+
+```bash
+cd /root/isaaclab-desktop-organizer
+
+# 从阶段二续训
+/path/to/IsaacLab/isaaclab.sh -p scripts/rl/train_rl.py \
+  --task Isaac-Desktop-Organizer-Franka-IK-Rel-v0 \
+  --num_envs 4096 \
+  --max_iterations 3000 \
+  --resume \
+  --load_run "阶段二的run_id" \
+  --headless
+```
+
+**预期结果**：
+- ✅ 模型能够处理更大范围的物体位置
+- ✅ 泛化能力增强，鲁棒性提升
+
+---
+
+### 📁 训练日志管理
 
 **训练日志位置**：`./logs/rsl_rl/desktop_organizer/{timestamp}/`（相对于项目目录）
 
@@ -143,7 +324,9 @@ cd /root/isaaclab-desktop-organizer
 ls -lt logs/rsl_rl/desktop_organizer/
 ```
 
-### 2️⃣ 可视化训练好的策略
+---
+
+## 3️⃣ 可视化训练好的策略
 
 ```bash
 # 确保在项目目录中
@@ -159,9 +342,15 @@ LATEST_RUN=$(ls -t logs/rsl_rl/desktop_organizer/ | head -1)
   --num_envs 16
 ```
 
+---
 
+# 🤖 模仿学习训练 (Behavior Cloning)
 
-### 3️⃣ 使用模仿学习训练（BC + MimicGen）
+本项目支持使用 **Robomimic (BC) + MimicGen** 进行模仿学习训练，通过数据增强实现高效学习。
+
+---
+
+## 1️⃣ BC 训练完整流程
 
 **重要**：外部包必须使用专用脚本（位于 `scripts/bc/`），不能使用 IsaacLab 官方脚本（官方脚本不导入外部包）。
 
@@ -203,9 +392,6 @@ python scripts/bc/add_mask.py \
   --dataset ./datasets/generated.hdf5 \
   --epochs 200
 
-  ### Step 6: 评估训练好的 BC 策略
-
-```bash
 # 步骤 6: 使用训练好的 BC 模型进行评估
 /path/to/IsaacLab/isaaclab.sh -p scripts/bc/play_bc.py \
   --task Isaac-Desktop-Organizer-Franka-IK-Rel-Mimic-v0 \
@@ -215,15 +401,17 @@ python scripts/bc/add_mask.py \
 
 **为什么必须用外部包脚本？**
 
-IsaacLab 官方脚本只导入主项目环境（`isaaclab_tasks`），不导入外部包（`desktop_organizer`）。详见 [外部包工具脚本完整指南](/root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_SCRIPTS_GUIDE.md)。
+IsaacLab 官方脚本只导入主项目环境（`isaaclab_tasks`），不导入外部包（`desktop_organizer`）。
 
-详细说明请查看 [MimicGen 数据生成指南](docs/mimic_data_generation.md)
+**详细说明**：
+- [外部包工具脚本完整指南](/root/isaaclab-desktop-organizer/tests/EXTERNAL_PACKAGE_SCRIPTS_GUIDE.md)
+- [MimicGen 数据生成指南](docs/mimic_data_generation.md)
 
 ---
 
 ## 📊 训练结果
 
-### 强化学习（PPO）
+### 强化学习 (PPO)
 
 | 指标 | 数值 |
 |------|------|
@@ -245,7 +433,7 @@ success_reward: 20000.0                       # 放入篮子（关键！）
 gripper_closed_penalty: -100.0                # 强制松开夹爪
 ```
 
-### 模仿学习（BC + MimicGen）
+### 模仿学习 (BC + MimicGen)
 
 | 指标 | 数值 |
 |------|------|
@@ -259,35 +447,35 @@ gripper_closed_penalty: -100.0                # 强制松开夹爪
 ## 🏗️ 项目架构
 
 ```
-isaaclab-desktop-organizer/          # 独立包
-├── desktop_organizer/               # 核心模块
-│   ├── envs/                        # 环境配置
-│   │   ├── rl_env_cfg.py           # RL 环境
-│   │   ├── mimic_env_cfg.py        # Mimic 配置
-│   │   └── mimic_env.py            # Mimic 包装器
-│   ├── mdp/                         # MDP 组件
-│   │   └── rewards.py              # 自定义奖励函数
+isaaclab-desktop-organizer/         # 独立包
+├── desktop_organizer/              # 核心模块
+│   ├── envs/                       # 环境配置
+│   │   ├── rl_env_cfg.py          # RL 环境
+│   │   ├── mimic_env_cfg.py       # Mimic 配置
+│   │   └── mimic_env.py         # Mimic 包装器
+│   ├── mdp/                      # MDP 组件
+│   │   └── rewards.py         # 自定义奖励函数
 │   ├── config/                      # 算法配置
-│   │   ├── ppo_cfg.py              # PPO 超参数
+│   │   ├── ppo_cfg.py             # PPO 超参数
 │   │   └── robomimic/bc.json       # BC 配置
-│   └── assets/                      # 机器人/场景资产
+│   └── assets/               # 机器人/场景资产
 ├── scripts/                         # 训练脚本
-│   ├── rl/                          # 强化学习脚本
+│   ├── rl/                      # 强化学习脚本
 │   │   ├── train_rl.py             # RL 训练
 │   │   └── play_rl.py              # RL 评估
-│   └── bc/                          # 模仿学习脚本
+│   └── bc/                      # 模仿学习脚本
 │       ├── record_demos.py         # 录制演示
-│       ├── annotate_demos.py       # 标注子任务
+│       ├── annotate_demos.py      # 标注子任务
 │       ├── generate_dataset.py     # 生成数据
 │       ├── train_bc.py             # BC 训练
 │       └── play_bc.py              # BC 评估
 ├── docs/                            # 文档
 │   ├── installation.md             # 安装指南
-│   └── mimic_data_generation.md    # Mimic 数据生成指南
-└── assets/                          # USD 场景文件
+│   └── mimic_data_generation.md # 数据生成指南
+└── assets/                      # USD 场景文件
     └── scenes/
         └── Collected_table_clean/
-            └── table_clean.usd     # 桌面场景（29KB）
+            └── table_clean.usd     # 桌面场景
 ```
 
 ---
